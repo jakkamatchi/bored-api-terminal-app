@@ -11,12 +11,12 @@
 int main(int argc, char** argv) {
 	//ToDo:
 	
-	if(argc != 2) { return 1; }
-
 	std::stringstream RawJSONFile;			
 
+	char* URL = "https://www.boredapi.com/api/activity";
+	
 	//Included in Util.h	
-	RawJSONFile = RetrieveData(argv[1]);			
+	RawJSONFile = RetrieveData(URL);			
 	std::vector<std::string> TokenisedJSON = TokeniseJSON(RawJSONFile.str());
 
 	JSONFile ParsedFile(TokenisedJSON);
