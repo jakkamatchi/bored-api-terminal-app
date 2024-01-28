@@ -21,13 +21,13 @@ void Node::AddChildNode(std::shared_ptr<Node> _node) {
 }
 
 void Node::Print() {
-	std::cout << "Field " << DataField << " contains " << ChildNodes.size() << " child nodes:" << std::endl;
+	std::cout << "Field " << DataField << " contains " << ChildNodes.size() << " child nodes:";
 	
 	for(int i = 0; i < ChildNodes.size(); i++) {
 		std::cout << i << ") " << ChildNodes[i]->DataField << " ";
 	}
 	
-	std::cout << std::endl << std::endl;
+	std::cout << std::endl;
 
 	for(int i = 0; i < ChildNodes.size(); i++) {
 		ChildNodes[i]->Print();
@@ -39,13 +39,17 @@ std::shared_ptr<Node> Node::GetParentNode() {
 }
 
 std::shared_ptr<Node> Node::GetSubNodeByID(std::string _parameter) {
-	_parameter = "\"" + _parameter + "\"";
-
 	for(int i = 0; i < this->ChildNodes.size(); i++) {
+		
 		if(this->ChildNodes[i]->DataField == _parameter) {
+			std::cout << _parameter << ChildNodes[i]->GetData() << "\n\n\n\n\n";
 			return this->ChildNodes[i];	
 		};
 	}
 
 	return nullptr;
 }
+
+std::shared_ptr<Node> Node::operator[](std::string _param) {
+	return GetSubNodeByID(_param);
+};

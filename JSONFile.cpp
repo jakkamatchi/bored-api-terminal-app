@@ -18,28 +18,50 @@ JSONFile::JSONFile (std::vector<std::string > Input) {
 	std::shared_ptr<Node> CurrentWorkingNode = nullptr;
 	CurrentWorkingNode = PrimaryNode;
 
+	bool CurrentArray = false;
+
+	int CurrentObjectID = 0;
+
 	for(int i = 0; i < Input.size(); i++) {		
 		Element = Input[i];
-
+		std::cout << "Token " << i << ": <" << Element << ">\n";
+		
 		//If {, then start of section. Depth can be incremented
-		if(Element == "{") {
+		if(Element == "{" && Input[i - 1] != ":") {
 			Depth++;
-			if(Depth != 0) {
-				std::shared_ptr<Node> NewNode = std::shared_ptr<Node>(new Node("BRANCH_NODE"));
-				CurrentWorkingNode->AddChildNode(NewNode);
-				CurrentWorkingNode = NewNode;
-			}
+			
+			std::string ObjectLabel= "OBJECT_NODE_" + std::to_string(CurrentObjectID);	
+			std::shared_ptr<Node> NewNode = std::shared_ptr<Node>(new Node(ObjectLabel));
+			CurrentObjectID++;
+
+			NewNode->SetParentNode(CurrentWorkingNode);
+			CurrentWorkingNode->AddChildNode(NewNode);
+			CurrentWorkingNode = NewNode;
 		}	
 		
 		//If }, then end of section. Depth can be decreased and current
 		//working node incremented
 		else if(Element == "}") {
 			Depth--;
-			if(Depth != 0) {
-				CurrentWorkingNode = CurrentWorkingNode->GetParentNode();
-			}
+			CurrentWorkingNode = CurrentWorkingNode->GetParentNode();
+		}
+
+		else if(Element == "[") {
+			std::shared_ptr<Node> NewNode = std::shared_ptr<Node>(new Node("ARRAY_NODE"));
+			CurrentArray = true;
+
+			NewNode->SetParentNode(CurrentWorkingNode);
+			CurrentWorkingNode->AddChildNode(NewNode);
+			CurrentWorkingNode = NewNode;
 		}
 		
+		//If closiong an array, create a new working node with ID of next field
+		else if(Element == "]") {
+			CurrentArray = false;
+
+			CurrentWorkingNode = CurrentWorkingNode->GetParentNode();
+		}
+	
 		//Current element is a string, hence this and i + 2 are string pairs
 		//Can create parent and child node without increasing depth
 		else if(Element == ":") {
@@ -49,8 +71,10 @@ JSONFile::JSONFile (std::vector<std::string > Input) {
 			if(Input[i + 1]  == "{") {
 				Depth++;
 				
-				std::shared_ptr<Node> NewNode = std::shared_ptr<Node>(new Node("BRANCH_NODE"));
+				std::shared_ptr<Node> NewNode = std::shared_ptr<Node>(new Node(Input[i - 1]));
+				NewNode->SetParentNode(CurrentWorkingNode);
 				CurrentWorkingNode->AddChildNode(NewNode);
+				
 				CurrentWorkingNode = NewNode;
 			}
 
@@ -75,9 +99,6 @@ JSONFile::JSONFile (std::vector<std::string > Input) {
 
 		//Current element is comma, indicating that next dataset is
 		//of same depth
-		else if(Element == ",") {
-			//i++;
-		}
 	}
 }
 

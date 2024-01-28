@@ -24,6 +24,8 @@ class Node {
 		void AddChildNode(std::shared_ptr<Node>);
 		
 		std::shared_ptr<Node> GetSubNodeByID(std::string);
+		
+		std::shared_ptr<Node> operator[](std::string);
 
 		void Print();
 };

@@ -24,6 +24,16 @@ std::vector<std::string> TokeniseJSON(std::string Input) {
 			isString = !isString;
 			SubstringLength++;
 		}
+
+		else if (Input[i] == ' '  && !isString) {
+			Input.erase(i, 1);
+			i = i - 1;
+		}
+
+		else if (Input[i] == '\n') {
+			Input.erase(i, 1);
+			i = i - 1;
+		}
 		else if(	(Input[i] == '{' ||
 				Input[i] == '}' ||
 				Input[i] == ',' ||
@@ -42,14 +52,21 @@ std::vector<std::string> TokeniseJSON(std::string Input) {
 				TokenList.push_back(Substring);
 			}
 			
-			SubstringIndex = i + 1;
+			SubstringIndex = i + 1 ;
 			SubstringLength = 1;
 		}
 		else {
 			SubstringLength++;
 		}
 	}
-	
+
+	for(int i = 0; i < TokenList.size(); i++) {
+		if(TokenList[i][0] == '"' && TokenList[i][TokenList[i].size() - 1] == '"') {
+			TokenList[i].erase(0, 1);
+			TokenList[i].erase(TokenList[i].size() - 1, 1);
+		}
+	}
+
 	return TokenList;	
 }
 
@@ -74,7 +91,6 @@ std::stringstream RetrieveData(char* Input) {
 
 int main(int argc, char** argv) {
 	//ToDo:
-	//Parse
 	
 	if(argc != 2) { return 1; }
 
@@ -84,14 +100,18 @@ int main(int argc, char** argv) {
 	std::vector<std::string> TokenisedJSON = TokeniseJSON(RawJSONFile.str());
 
 	JSONFile ParsedFile(TokenisedJSON);
-	
-	std::shared_ptr<Node> ActivityNode = ParsedFile["activity"];
-	ActivityNode = ActivityNode->ChildNodes[0];
+	ParsedFile.Print();
 
-	std::shared_ptr<Node> TypeNode = ParsedFile["type"];
+	std::shared_ptr<Node> BaseNode = ParsedFile.PrimaryNode;
+	BaseNode = (*BaseNode)["OBJECT_NODE_0"];
+
+	std::shared_ptr<Node> ActivityNode = (*BaseNode)["activity"];
+	ActivityNode = ActivityNode->ChildNodes[0];	
+
+	std::shared_ptr<Node> TypeNode =(*BaseNode)["type"];
 	TypeNode = TypeNode->ChildNodes[0];
 	
-	std::shared_ptr<Node> ParticipantsNode = ParsedFile["participants"];
+	std::shared_ptr<Node> ParticipantsNode = (*BaseNode)["participants"];
 	ParticipantsNode = ParticipantsNode->ChildNodes[0];
 
 	const std::string BOLD_ON = "\033[1m";	
@@ -113,7 +133,6 @@ int main(int argc, char** argv) {
 	std::cout << BLUE << "Activity: " << ActivityNode->GetData() << RESET_COLOUR << "\n";
 	std::cout << GREEN << "Type: " << TypeNode->GetData() << RESET_COLOUR << "\n";	
 
-	std::cout << RESET_COLOUR;
 	std::cout << RED << "Participants: " << ParticipantsNode->GetData() << RESET_COLOUR << "\n";
 
 	std::cout << std::endl;
