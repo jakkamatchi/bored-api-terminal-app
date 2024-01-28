@@ -42,7 +42,6 @@ std::shared_ptr<Node> Node::GetSubNodeByID(std::string _parameter) {
 	for(int i = 0; i < this->ChildNodes.size(); i++) {
 		
 		if(this->ChildNodes[i]->DataField == _parameter) {
-			std::cout << _parameter << ChildNodes[i]->GetData() << "\n\n\n\n\n";
 			return this->ChildNodes[i];	
 		};
 	}
